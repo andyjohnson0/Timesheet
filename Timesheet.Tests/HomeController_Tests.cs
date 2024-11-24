@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Timesheet.App;
 using Timesheet.App.Controllers;
@@ -20,14 +21,49 @@ namespace Timesheet.Tests
         }
 
 
+        private readonly TimesheetEntry[] _testEntries =
+        [
+            new TimesheetEntry()
+            {
+                Date = new DateOnly(2014, 10, 22),
+                UserName = "John Smith",
+                ProjectName = "Project Alpha",
+                TaskDescription = "Developed new feature X",
+                HoursWorked = 4
+            },
+            new TimesheetEntry()
+            {
+                Date = new DateOnly(2014, 10, 22),
+                UserName = "John Smith",
+                ProjectName = "Project Beta",
+                TaskDescription = "Developed new feature Y",
+                HoursWorked = 4
+            },
+            new TimesheetEntry()
+            {
+                Date = new DateOnly(2014, 10, 22),
+                UserName = "Jane Doe",
+                ProjectName = "Project Gamma",
+                TaskDescription = "Conducted user testing",
+                HoursWorked = 6
+            }
+        ];
+
+
         [TestMethod]
         public void Add_ValidEntry_AddsToDatabase()
         {
             // Arrange
-            var controller = new HomeController(_mockLogger!.Object);
+            var mockSet = new Mock<DbSet<TimesheetEntry>>();
+            var data = new List<TimesheetEntry>();
+            mockSet.Setup(m => m.Add(It.IsAny<TimesheetEntry>()));
+
+            var mockDbContext = new Mock<TimesheetDbContext>();
+
+            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
             // Act
-            var result = controller.Add() as OkResult;
+            var result = controller.Add(_testEntries[0]) as OkResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -38,7 +74,13 @@ namespace Timesheet.Tests
         public void Timesheet_ValidCsv()
         {
             // Arrange
-            var controller = new HomeController(_mockLogger!.Object);
+            var mockSet = new Mock<DbSet<TimesheetEntry>>();
+            var data = new List<TimesheetEntry>();
+            mockSet.Setup(m => m.Add(It.IsAny<TimesheetEntry>()));
+
+            var mockDbContext = new Mock<TimesheetDbContext>();
+
+            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
             // Act
             var result = controller.Timesheet() as OkObjectResult;

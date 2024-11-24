@@ -5,11 +5,15 @@ namespace Timesheet.App.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(
+            TimesheetDbContext db, 
+            ILogger<HomeController> logger)
         {
+            _db = db;
             _logger = logger;
         }
 
+        private readonly TimesheetDbContext _db;
         private readonly ILogger<HomeController> _logger;
 
 
@@ -22,9 +26,10 @@ namespace Timesheet.App.Controllers
         /// <summary>
         /// Add a timesheet entry
         /// </summary>
+        /// <param name="entry">Timesheet entry</param>
         /// <returns>ActionResult</returns>
         [HttpPost]
-        public ActionResult Add()
+        public ActionResult Add(TimesheetEntry entry)
         {
             return Ok();
         }
