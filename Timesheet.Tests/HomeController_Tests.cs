@@ -79,25 +79,46 @@ namespace Timesheet.Tests
 
 
         [TestMethod]
-        public void Timesheet_ValidCsv()
+        public void Timesheet_MultipleEntries_ValidCsv()
         {
-            // Arrange
-            var mockSet = new Mock<DbSet<TimesheetEntry>>();
-            var data = new List<TimesheetEntry>();
-            mockSet.Setup(m => m.Add(It.IsAny<TimesheetEntry>()));
+            // Arrange. Note that we are using a real in-memory database, not a mock
+            var options = new DbContextOptionsBuilder<TimesheetDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
+            using var dbContext = new TimesheetDbContext(options);
+            dbContext.Entries.AddRange(_testEntries);  // Add test data
+            dbContext.SaveChanges();
 
-            var mockDbContext = new Mock<TimesheetDbContext>();
-
-            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
+            var controller = new HomeController(dbContext, _mockLogger!.Object);
 
             // Act
             var result = controller.Timesheet() as OkObjectResult;
 
             // Assert
+            const int expectedLineCount = 4;  // 3 data lines, plus 1 header line
+            const int expectedElementCount = 5;
             Assert.IsNotNull(result);
             var csvText = result.Value as string;
             Assert.IsNotNull(csvText);
-            Assert.AreEqual("", csvText);
+            Assert.AreNotEqual("", csvText);
+            var csvLines = csvText.TrimEnd().Split(Environment.NewLine);  // remove trailing blank line
+            Assert.AreEqual(expectedLineCount, csvLines.Length);
+            for (int iLine = 0; iLine < expectedLineCount; iLine++)
+            {
+                // Extract elements from lines
+                var elems = csvLines[iLine].Split(',');
+                // Header and data lines
+                Assert.AreEqual(expectedElementCount, elems.Length);
+                if (iLine >= 1)
+                {
+                    // Data lines only
+                    Assert.AreEqual(_testEntries[iLine - 1].UserName, elems[0]);
+                    Assert.AreEqual(_testEntries[iLine - 1].Date.ToString("d"), elems[1]);
+                    Assert.AreEqual(_testEntries[iLine - 1].ProjectName, elems[2]);
+                    Assert.AreEqual(_testEntries[iLine - 1].TaskDescription, elems[3]);
+                    Assert.AreEqual(_testEntries[iLine - 1].HoursWorked.ToString(), elems[4]);
+                }
+            }
         }
     }
 }

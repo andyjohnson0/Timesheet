@@ -43,7 +43,9 @@ namespace Timesheet.App.Controllers
         [HttpGet]
         public ActionResult Timesheet()
         {
-            return Ok("");
+            var model = new TimesheetModel(_db);
+            var csvText = model.GetTimesheetAsCSV();
+            return Ok(csvText);
         }
     }
 }
