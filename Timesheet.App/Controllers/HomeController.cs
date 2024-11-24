@@ -31,6 +31,19 @@ namespace Timesheet.App.Controllers
         [HttpPost]
         public ActionResult Add(TimesheetEntry entry)
         {
+            // Validation
+            if (!ModelState.IsValid)
+            {
+                // Return with validation messages
+                return View("Index", entry);
+            }
+            if (entry.Date > DateOnly.FromDateTime(DateTime.Now))
+            {
+                // Return with validation message
+                ModelState?.AddModelError("Date", "Cannot submit future work items");
+                return View("Index", entry);
+            }
+
             var model = new TimesheetModel(_db);
             return model.AddEntry(entry) ? Ok() : Problem();
         }
