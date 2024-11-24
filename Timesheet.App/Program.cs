@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Timesheet.App
 {
     public class Program
@@ -8,6 +10,10 @@ namespace Timesheet.App
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Register TimesheetDbContext
+            builder.Services.AddRazorPages();
+            builder.Services.AddDbContext<TimesheetDbContext>(o => o.UseInMemoryDatabase("TimesheetDatabase"));
 
             var app = builder.Build();
 
