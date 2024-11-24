@@ -27,11 +27,12 @@ namespace Timesheet.App.Controllers
         /// Add a timesheet entry
         /// </summary>
         /// <param name="entry">Timesheet entry</param>
-        /// <returns>ActionResult</returns>
+        /// <returns>ActionResult encapsulating http status</returns>
         [HttpPost]
         public ActionResult Add(TimesheetEntry entry)
         {
-            return Ok();
+            var model = new TimesheetModel(_db);
+            return model.AddEntry(entry) ? Ok() : Problem();
         }
 
 

@@ -56,9 +56,14 @@ namespace Timesheet.Tests
             // Arrange
             var mockSet = new Mock<DbSet<TimesheetEntry>>();
             var data = new List<TimesheetEntry>();
-            mockSet.Setup(m => m.Add(It.IsAny<TimesheetEntry>()));
+            mockSet
+                .Setup(m => m.Add(It.IsAny<TimesheetEntry>()))
+                .Callback<TimesheetEntry>(entry => data.Add(entry));
 
             var mockDbContext = new Mock<TimesheetDbContext>();
+            mockDbContext.Setup(c => c.Entries).Returns(mockSet.Object);
+            mockDbContext.Setup(c => c.SaveChanges()).Returns(1);
+
 
             var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
@@ -66,7 +71,10 @@ namespace Timesheet.Tests
             var result = controller.Add(_testEntries[0]) as OkResult;
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.IsNotNull(result);  // Verify that Add() returned success
+            Assert.AreEqual(1, data.Count);  // Verify the entry was added.
+            Assert.AreEqual(_testEntries[0].UserName, data[0].UserName);  // Verify entry present in backing list
+            mockDbContext.Verify(c => c.SaveChanges(), Times.Once);  // Verify SaveChanges was called.
         }
 
 
