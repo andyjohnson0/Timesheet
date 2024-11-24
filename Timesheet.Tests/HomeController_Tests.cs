@@ -96,7 +96,13 @@ namespace Timesheet.Tests
 
             // Assert
             const int expectedLineCount = 4;  // 3 data lines, plus 1 header line
-            const int expectedElementCount = 5;
+            const int expectedElementCount = 6;
+            var expectedWorkingHours = new int[]
+            {
+                _testEntries[0].HoursWorked + _testEntries[1].HoursWorked,
+                _testEntries[0].HoursWorked + _testEntries[1].HoursWorked,
+                _testEntries[2].HoursWorked
+            };
             Assert.IsNotNull(result);
             var csvText = result.Value as string;
             Assert.IsNotNull(csvText);
@@ -117,6 +123,7 @@ namespace Timesheet.Tests
                     Assert.AreEqual(_testEntries[iLine - 1].ProjectName, elems[2]);
                     Assert.AreEqual(_testEntries[iLine - 1].TaskDescription, elems[3]);
                     Assert.AreEqual(_testEntries[iLine - 1].HoursWorked.ToString(), elems[4]);
+                    Assert.AreEqual(expectedWorkingHours[iLine - 1].ToString(), elems[5]);
                 }
             }
         }

@@ -39,15 +39,31 @@ namespace Timesheet.App.Models
         public string GetTimesheetAsCSV()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("User Name,Date,Project,Description of Tasks,Hours Worked");
+            sb.AppendLine("User Name,Date,Project,Description of Tasks,Hours Worked,Total Hours for the Day");
 
-            // Query the data source and build the CSV
+            // Query with grouping and summation to generate the total hours worked per day, per the problem statement, and build the CSV
             var query = _db.Entries
-                .OrderBy(entry => entry.Date);
-            foreach (var entry in query)
+                .GroupBy(entry => new { entry.UserName, entry.Date })
+                .Select(group => new
+                {
+                    UserName = group.Key.UserName,
+                    Date = group.Key.Date,
+                    TotalHoursWorked = group.Sum(entry => entry.HoursWorked),
+                    Entries = group.Select(entry => new
+                    {
+                        entry.ProjectName,
+                        entry.TaskDescription,
+                        entry.HoursWorked
+                    }).ToList()
+                })
+                .OrderBy(result => result.Date);
+            foreach (var result in query)
             {
-                var line = $"{CsvEscape(entry.UserName)},{entry.Date.ToString("d")},{CsvEscape(entry.ProjectName)},{CsvEscape(entry.TaskDescription!)},{entry.HoursWorked}";
-                sb.AppendLine(line);
+                foreach (var entry in result.Entries)
+                {
+                    var line = $"{CsvEscape(result.UserName)},{result.Date.ToString("d")},{CsvEscape(entry.ProjectName)},{CsvEscape(entry.TaskDescription!)},{entry.HoursWorked},{result.TotalHoursWorked}";
+                    sb.AppendLine(line);
+                }
             }
 
             return sb.ToString();
