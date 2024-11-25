@@ -27,7 +27,10 @@ namespace Timesheet.App.Controllers
         /// Add a timesheet entry
         /// </summary>
         /// <param name="entry">Timesheet entry</param>
-        /// <returns>ActionResult encapsulating http status</returns>
+        /// <returns>ActionResult encapsulating http status:
+        /// - For success this will be 200 or 302
+        /// - For failure this will be 500
+        /// </returns>
         [HttpPost]
         public ActionResult Add(TimesheetEntry entry)
         {
@@ -45,7 +48,16 @@ namespace Timesheet.App.Controllers
             }
 
             var model = new TimesheetModel(_db);
-            return model.AddEntry(entry) ? Ok() : Problem();
+            var success = model.AddEntry(entry);
+
+            if (TempData != null)
+            {
+                if (success)
+                    TempData["SuccessMessage"] = "Timesheet entry added";
+                else
+                    TempData["ErrorMessage"] = "Failed to add timesheet entry";
+            }
+            return success ? RedirectToAction("Index") : Problem();
         }
 
 

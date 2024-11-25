@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Timesheet.App;
 using Timesheet.App.Controllers;
 using Timesheet.App.Models;
@@ -66,10 +67,10 @@ namespace Timesheet.Tests
             var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
             // Act
-            var result = controller.Add(_testEntries[0]) as OkResult;
+            var result = controller.Add(_testEntries[0]);
 
             // Assert
-            Assert.IsNotNull(result);  // Verify that Add() returned success
+            Assert.IsTrue(result is OkResult || result is RedirectToActionResult);
             Assert.AreEqual(1, data.Count);  // Verify the entry was added.
             Assert.AreEqual(_testEntries[0].UserName, data[0].UserName);  // Verify entry present in backing list
             mockDbContext.Verify(c => c.SaveChanges(), Times.Once);  // Verify SaveChanges was called.
