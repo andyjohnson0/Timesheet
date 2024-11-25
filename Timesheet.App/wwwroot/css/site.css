@@ -32,6 +32,18 @@ button {
     font-size: 16px;
 }
 
+.download-link {
+    margin-top: 20px;
+}
+
+    .download-link a {
+        text-decoration: none;
+        color: white;
+        background-color: forestgreen;
+        padding: 10px 15px;
+        cursor: pointer;
+    }
+
 .success-message {
     color: darkgreen;
     font-size: 16px;

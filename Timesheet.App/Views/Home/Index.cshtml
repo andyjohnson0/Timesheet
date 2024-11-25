@@ -70,6 +70,15 @@
         }
     }
 
+    <div class="download-link" id="downloadLink">
+        <a id="downloadTimesheet">Download Timesheet CSV</a>
+    </div>
+    <script>
+        document.getElementById("downloadTimesheet").addEventListener("click", () => {
+            downloadFile('/Home/Timesheet', 'timesheet.csv');
+        });
+    </script>
+
 </body>
 
 </html>
