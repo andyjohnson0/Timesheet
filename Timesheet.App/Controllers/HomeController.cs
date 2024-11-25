@@ -3,6 +3,9 @@ using Timesheet.App.Models;
 
 namespace Timesheet.App.Controllers
 {
+    /// <summary>
+    /// Main controller
+    /// </summary>
     public class HomeController : Controller
     {
         public HomeController(

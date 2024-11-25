@@ -3,7 +3,7 @@
 namespace Timesheet.App.Models
 {
     /// <summary>
-    /// A timesheet entry
+    /// Timesheet entry representation
     /// </summary>
     public class TimesheetEntry
     {

@@ -32,7 +32,7 @@ namespace Timesheet.App
 
 
         /// <summary>
-        /// Delete all entries
+        /// Delete all entries in the DBSet
         /// </summary>
         public virtual void DeleteAll()
         {

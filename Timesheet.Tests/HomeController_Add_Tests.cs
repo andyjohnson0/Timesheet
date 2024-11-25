@@ -10,6 +10,9 @@ using Timesheet.App.Models;
 
 namespace Timesheet.Tests
 {
+    /// <summary>
+    /// Tests for the Add endpoint
+    /// </summary>
     [TestClass]
     public class HomeController_Add_Tests
     {
