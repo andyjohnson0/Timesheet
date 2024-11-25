@@ -12,15 +12,13 @@ namespace Timesheet.Tests
     [TestClass]
     public class HomeController_Add_Tests
     {
-        private Mock<ILogger<HomeController>>? _mockLogger;
-
         [TestInitialize]
         public void SetUp()
         {
-            // Initialize mock DbContext and controller
             _mockLogger = new Mock<ILogger<HomeController>>();
         }
 
+        private Mock<ILogger<HomeController>>? _mockLogger;
 
         private readonly TimesheetEntry[] _testEntries =
         [
@@ -65,7 +63,6 @@ namespace Timesheet.Tests
             mockDbContext.Setup(c => c.Entries).Returns(mockSet.Object);
             mockDbContext.Setup(c => c.SaveChanges()).Returns(1);
 
-
             var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
             // Act
@@ -82,89 +79,64 @@ namespace Timesheet.Tests
         [TestMethod]
         public void Add_InvalidEntry_UserNameEmpty_NotAddedToDatabase()
         {
-            // Arrange
-            var mockSet = new Mock<DbSet<TimesheetEntry>>();
-            var mockDbContext = new Mock<TimesheetDbContext>();
-            mockDbContext.Setup(c => c.Entries).Returns(mockSet.Object);
-
-            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
-
-            // Act
             var invalidEntry = new TimesheetEntry
             {
-                UserName = "",
+                UserName = "",  // Invalid
                 Date = _testEntries[0].Date,
                 ProjectName = _testEntries[0].ProjectName,
                 TaskDescription = _testEntries[0].TaskDescription,
                 HoursWorked = _testEntries[0].HoursWorked,
             };
-            controller.DoAspNetModelValidation(invalidEntry);
-            controller.Add(invalidEntry);
-
-            // Assert
-            mockSet.Verify(m => m.Add(It.IsAny<TimesheetEntry>()), Times.Never); // Ensure Add was not called.
-            mockDbContext.Verify(c => c.SaveChanges(), Times.Never); // Ensure SaveChanges was not called.
+            DoAdd_InvalidEntry_NotAddedToDatabase(invalidEntry);
         }
 
 
         [TestMethod]
         public void Add_InvalidEntry_FutureDate_NotAddedToDatabase()
         {
-            // Arrange
-            var mockSet = new Mock<DbSet<TimesheetEntry>>();
-            var mockDbContext = new Mock<TimesheetDbContext>();
-            mockDbContext.Setup(c => c.Entries).Returns(mockSet.Object);
-
-            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
-
-            // Act
             var invalidEntry = new TimesheetEntry
             {
                 UserName = _testEntries[0].UserName,
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(7)),
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(7)),  // Invalid
                 ProjectName = _testEntries[0].ProjectName,
                 TaskDescription = _testEntries[0].TaskDescription,
                 HoursWorked = _testEntries[0].HoursWorked,
             };
-            controller.DoAspNetModelValidation(invalidEntry);
-            controller.Add(invalidEntry);
-
-            // Assert
-            mockSet.Verify(m => m.Add(It.IsAny<TimesheetEntry>()), Times.Never); // Ensure Add was not called.
-            mockDbContext.Verify(c => c.SaveChanges(), Times.Never); // Ensure SaveChanges was not called.
+            DoAdd_InvalidEntry_NotAddedToDatabase(invalidEntry);
         }
 
 
         [TestMethod]
         public void Add_InvalidEntry_ProjectNameEmpty_NotAddedToDatabase()
         {
-            // Arrange
-            var mockSet = new Mock<DbSet<TimesheetEntry>>();
-            var mockDbContext = new Mock<TimesheetDbContext>();
-            mockDbContext.Setup(c => c.Entries).Returns(mockSet.Object);
-
-            var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
-
-            // Act
             var invalidEntry = new TimesheetEntry
             {
                 UserName = _testEntries[0].UserName,
                 Date = _testEntries[0].Date,
-                ProjectName = "",
+                ProjectName = "",  // Invalid
                 TaskDescription = _testEntries[0].TaskDescription,
                 HoursWorked = _testEntries[0].HoursWorked,
             };
-            controller.DoAspNetModelValidation(invalidEntry);
-            controller.Add(invalidEntry);
-
-            // Assert
-            mockSet.Verify(m => m.Add(It.IsAny<TimesheetEntry>()), Times.Never); // Ensure Add was not called.
-            mockDbContext.Verify(c => c.SaveChanges(), Times.Never); // Ensure SaveChanges was not called.
+            DoAdd_InvalidEntry_NotAddedToDatabase(invalidEntry);
         }
 
 
         [TestMethod]
         public void Add_InvalidEntry_InvalidHoursWorked_NotAddedToDatabase()
+        {
+            var invalidEntry = new TimesheetEntry
+            {
+                UserName = _testEntries[0].UserName,
+                Date = _testEntries[0].Date,
+                ProjectName = _testEntries[0].ProjectName,
+                TaskDescription = _testEntries[0].TaskDescription,
+                HoursWorked = 0,  // Invalid
+            };
+            DoAdd_InvalidEntry_NotAddedToDatabase(invalidEntry);
+        }
+
+
+        private void DoAdd_InvalidEntry_NotAddedToDatabase(TimesheetEntry invalidEntry)
         {
             // Arrange
             var mockSet = new Mock<DbSet<TimesheetEntry>>();
@@ -174,14 +146,6 @@ namespace Timesheet.Tests
             var controller = new HomeController(mockDbContext.Object, _mockLogger!.Object);
 
             // Act
-            var invalidEntry = new TimesheetEntry
-            {
-                UserName = _testEntries[0].UserName,
-                Date = _testEntries[0].Date,
-                ProjectName = _testEntries[0].ProjectName,
-                TaskDescription = _testEntries[0].TaskDescription,
-                HoursWorked = 0,
-            };
             controller.DoAspNetModelValidation(invalidEntry);
             controller.Add(invalidEntry);
 
@@ -189,9 +153,6 @@ namespace Timesheet.Tests
             mockSet.Verify(m => m.Add(It.IsAny<TimesheetEntry>()), Times.Never); // Ensure Add was not called.
             mockDbContext.Verify(c => c.SaveChanges(), Times.Never); // Ensure SaveChanges was not called.
         }
-
-
-
     }
 
 
